@@ -27,4 +27,4 @@ app.get("/", (req, res) => {
 })
 
 
-app.use("/api/auth", require("./routes/authroutes"))
+app.use("/api/auth", require("./routes/authRoutes"))
