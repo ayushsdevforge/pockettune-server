@@ -12,14 +12,14 @@ app.use(cors())
 app.use(express.json())
 
 mongoose.connect(process.env.MONGODB_URI)
-.then(() => {
-    console.log("Connected to MongoDB")
-    app.listen(PORT, () => {
-        console.log(`Server is running on port ${PORT}`)
+    .then(() => {
+        console.log("Connected to MongoDB")
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`)
+        })
+    }).catch((error) => {
+        console.error("MongoDB connection error:", error)
     })
-}).catch((error) => {   
-    console.error("MongoDB connection error:", error)
-})
 
 
 app.get("/", (req, res) => {
@@ -28,3 +28,5 @@ app.get("/", (req, res) => {
 
 
 app.use("/api/auth", require("./routes/authRoutes"))
+app.use("/api/user-data", require("./routes/userDataRoutes"))
+
