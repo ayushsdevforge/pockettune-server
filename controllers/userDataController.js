@@ -63,48 +63,56 @@ const getFinancialSummary = async (req, res) => {
             await userData.save();
         }
 
+        // Safe access with default values
+        const totalBalance = userData.totalBalance ?? 0;
+        const monthlyIncome = userData.monthlyIncome ?? 0;
+        const monthlyExpenses = userData.monthlyExpenses ?? 0;
+        const savingRate = userData.savingRate ?? 0;
+        const financialHealth = userData.financialHealth ?? 0;
+        const budgetUsed = userData.budgetUsed ?? 0;
+
         const summary = {
             totalBalance: {
                 isblue: true,
                 label: 'Total Balance',
-                value: `₹${userData.totalBalance.toLocaleString('en-IN')}.00`,
+                value: `₹${totalBalance.toLocaleString('en-IN')}.00`,
                 valueChangedFromLastMonth: 0,
                 iconColor: 'text-white',
             },
             income: {
                 label: 'Monthly Income',
-                value: `₹${userData.monthlyIncome.toLocaleString('en-IN')}.00`,
+                value: `₹${monthlyIncome.toLocaleString('en-IN')}.00`,
                 valueChangedFromLastMonth: 0,
                 iconColor: 'text-green-500',
             },
             expense: {
                 label: 'Monthly Expenses',
-                value: `₹${userData.monthlyExpenses.toLocaleString('en-IN')}.00`,
+                value: `₹${monthlyExpenses.toLocaleString('en-IN')}.00`,
                 valueChangedFromLastMonth: 0,
                 iconColor: 'text-red-500',
             },
             saving: {
                 label: 'Saving Rate',
-                value: userData.savingRate,
+                value: savingRate,
                 isProgressBarVisible: true,
-                progressBarValue: userData.savingRate,
-                valueChangedFromLastMonth: userData.savingRate,
+                progressBarValue: savingRate,
+                valueChangedFromLastMonth: savingRate,
                 iconColor: 'text-blue-500',
             },
             Health: {
                 label: 'Financial Health',
-                value: userData.financialHealth,
+                value: financialHealth,
                 isProgressBarVisible: true,
-                progressBarValue: userData.financialHealth,
-                valueChangedFromLastMonth: userData.financialHealth,
+                progressBarValue: financialHealth,
+                valueChangedFromLastMonth: financialHealth,
                 iconColor: 'text-violet-500',
             },
             budget: {
                 label: 'Budget Used',
-                value: userData.budgetUsed,
+                value: budgetUsed,
                 isProgressBarVisible: true,
-                progressBarValue: userData.budgetUsed,
-                valueChangedFromLastMonth: userData.budgetUsed,
+                progressBarValue: budgetUsed,
+                valueChangedFromLastMonth: budgetUsed,
                 iconColor: 'text-red-500',
             },
         };
@@ -126,62 +134,78 @@ const getBudgetData = async (req, res) => {
             await userData.save();
         }
 
-        const categories = userData.budgetCategories;
+        // Safe access with default values
+        const categories = userData.budgetCategories || {};
+
+        const getCategory = (cat) => ({
+            budget: cat?.budget ?? 0,
+            spent: cat?.spent ?? 0
+        });
+
+        const monthlyBudget = getCategory(categories.monthlyBudget);
+        const foodDining = getCategory(categories.foodDining);
+        const transportation = getCategory(categories.transportation);
+        const shopping = getCategory(categories.shopping);
+        const entertainment = getCategory(categories.entertainment);
+        const billsUtilities = getCategory(categories.billsUtilities);
+        const healthcare = getCategory(categories.healthcare);
+        const education = getCategory(categories.education);
+        const personalCare = getCategory(categories.personalCare);
 
         const budgetData = {
             monthlyBudget: {
                 label: 'Monthly Budget',
-                budget: categories.monthlyBudget.budget,
-                spent: `₹${categories.monthlyBudget.spent}.00 spent`,
-                left: `₹${(categories.monthlyBudget.budget - categories.monthlyBudget.spent).toLocaleString('en-IN')} remaining`,
+                budget: monthlyBudget.budget,
+                spent: `₹${monthlyBudget.spent}.00 spent`,
+                left: `₹${(monthlyBudget.budget - monthlyBudget.spent).toLocaleString('en-IN')} remaining`,
             },
             foodDining: {
                 label: 'Food & Dining',
-                budget: categories.foodDining.budget,
-                spent: `₹${categories.foodDining.spent}.00 spent`,
-                left: `₹${(categories.foodDining.budget - categories.foodDining.spent).toLocaleString('en-IN')} remaining`,
+                budget: foodDining.budget,
+                spent: `₹${foodDining.spent}.00 spent`,
+                left: `₹${(foodDining.budget - foodDining.spent).toLocaleString('en-IN')} remaining`,
             },
             transportation: {
                 label: 'Transportation',
-                budget: categories.transportation.budget,
-                spent: `₹${categories.transportation.spent}.00 spent`,
-                left: `₹${(categories.transportation.budget - categories.transportation.spent).toLocaleString('en-IN')} remaining`,
+                budget: transportation.budget,
+                spent: `₹${transportation.spent}.00 spent`,
+                left: `₹${(transportation.budget - transportation.spent).toLocaleString('en-IN')} remaining`,
             },
             shopping: {
                 label: 'Shopping',
-                budget: categories.shopping.budget,
-                spent: `₹${categories.shopping.spent}.00 spent`,
-                left: `₹${(categories.shopping.budget - categories.shopping.spent).toLocaleString('en-IN')} remaining`,
+                budget: shopping.budget,
+                spent: `₹${shopping.spent}.00 spent`,
+                left: `₹${(shopping.budget - shopping.spent).toLocaleString('en-IN')} remaining`,
             },
             entertainment: {
                 label: 'Entertainment',
-                budget: categories.entertainment.budget,
-                spent: `₹${categories.entertainment.spent}.00 spent`,
-                left: `₹${(categories.entertainment.budget - categories.entertainment.spent).toLocaleString('en-IN')} remaining`,
+                budget: entertainment.budget,
+                spent: `₹${entertainment.spent}.00 spent`,
+                left: `₹${(entertainment.budget - entertainment.spent).toLocaleString('en-IN')} remaining`,
             },
             billsUtilities: {
                 label: 'Bills & Utilities',
-                budget: categories.billsUtilities.budget,
-                spent: `₹${categories.billsUtilities.spent}.00 spent`,
-                left: `₹${(categories.billsUtilities.budget - categories.billsUtilities.spent).toLocaleString('en-IN')} remaining`,
+                budget: billsUtilities.budget,
+                spent: `₹${billsUtilities.spent}.00 spent`,
+                left: `₹${(billsUtilities.budget - billsUtilities.spent).toLocaleString('en-IN')} remaining`,
             },
             healthcare: {
                 label: 'Healthcare',
-                budget: categories.healthcare.budget,
-                spent: `₹${categories.healthcare.spent}.00 spent`,
-                left: `₹${(categories.healthcare.budget - categories.healthcare.spent).toLocaleString('en-IN')} remaining`,
+                budget: healthcare.budget,
+                spent: `₹${healthcare.spent}.00 spent`,
+                left: `₹${(healthcare.budget - healthcare.spent).toLocaleString('en-IN')} remaining`,
             },
             education: {
                 label: 'Education',
-                budget: categories.education.budget,
-                spent: `₹${categories.education.spent}.00 spent`,
-                left: `₹${(categories.education.budget - categories.education.spent).toLocaleString('en-IN')} remaining`,
+                budget: education.budget,
+                spent: `₹${education.spent}.00 spent`,
+                left: `₹${(education.budget - education.spent).toLocaleString('en-IN')} remaining`,
             },
             personalCare: {
                 label: 'Personal Care',
-                budget: categories.personalCare.budget,
-                spent: `₹${categories.personalCare.spent}.00 spent`,
-                left: `₹${(categories.personalCare.budget - categories.personalCare.spent).toLocaleString('en-IN')} remaining`,
+                budget: personalCare.budget,
+                spent: `₹${personalCare.spent}.00 spent`,
+                left: `₹${(personalCare.budget - personalCare.spent).toLocaleString('en-IN')} remaining`,
             },
         };
 
