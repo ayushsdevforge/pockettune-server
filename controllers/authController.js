@@ -1,4 +1,6 @@
 const User = require('../models/user');
+const UserData = require('../models/userData');
+const Account = require('../models/account');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
@@ -21,9 +23,43 @@ const register = async (req, res) => {
             password: hashedPassword,
         });
         await newUser.save();
-        res.status(201).json({ message: 'User registered successfully' });
+        console.log('User created:', newUser._id);
+
+        // Initialize user data for the new user
+        try {
+            const userData = new UserData({ userId: newUser._id });
+            await userData.save();
+            console.log('UserData created');
+        } catch (userDataError) {
+            console.error('Error creating UserData:', userDataError.message);
+            // Continue even if UserData fails, it will be created on first access
+        }
+
+        // Create a default Cash account for the new user  
+        try {
+            const defaultAccount = new Account({
+                userId: newUser._id,
+                name: 'Cash',
+                type: 'cash',
+                balance: 0,
+            });
+            await defaultAccount.save();
+            console.log('Default account created');
+        } catch (accountError) {
+            console.error('Error creating default account:', accountError.message);
+            // Continue even if account creation fails
+        }
+
+        // Auto-login: Generate token and return user data
+        const token = jwt.sign({ userId: newUser._id }, JWT_SECRET, { expiresIn: '7d' });
+        res.status(201).json({
+            message: 'User registered successfully',
+            token,
+            user: { id: newUser._id, name: newUser.name, email: newUser.email }
+        });
     } catch (error) {
-        console.error('Registration error:', error);
+        console.error('Registration error:', error.message);
+        console.error('Full error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 };
@@ -39,7 +75,7 @@ const login = async (req, res) => {
         if (!isMatch) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
-        const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' });
         res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
     } catch (error) {
         console.error('Login error:', error);

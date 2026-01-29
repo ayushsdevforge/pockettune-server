@@ -1,4 +1,5 @@
 const UserData = require('../models/userData');
+const Account = require('../models/account');
 
 // Initialize user data with default values
 const initializeUserData = async (req, res) => {
@@ -63,13 +64,44 @@ const getFinancialSummary = async (req, res) => {
             await userData.save();
         }
 
+        // Calculate total balance from all accounts
+        const accounts = await Account.find({ userId: req.userId });
+        let totalBalance = 0;
+        accounts.forEach(account => {
+            if (account.type !== 'credit') {
+                totalBalance += account.balance;
+            } else {
+                totalBalance -= Math.abs(account.balance);
+            }
+        });
+
         // Safe access with default values
-        const totalBalance = userData.totalBalance ?? 0;
         const monthlyIncome = userData.monthlyIncome ?? 0;
         const monthlyExpenses = userData.monthlyExpenses ?? 0;
-        const savingRate = userData.savingRate ?? 0;
-        const financialHealth = userData.financialHealth ?? 0;
-        const budgetUsed = userData.budgetUsed ?? 0;
+
+        // Calculate saving rate: (income - expenses) / income * 100
+        let savingRate = 0;
+        if (monthlyIncome > 0) {
+            savingRate = Math.round(((monthlyIncome - monthlyExpenses) / monthlyIncome) * 100);
+            savingRate = Math.max(0, Math.min(100, savingRate)); // Clamp between 0 and 100
+        }
+
+        // Calculate financial health based on multiple factors
+        let financialHealth = 0;
+        if (monthlyIncome > 0) {
+            const expenseRatio = monthlyExpenses / monthlyIncome;
+            if (expenseRatio <= 0.5) financialHealth = 100;
+            else if (expenseRatio <= 0.7) financialHealth = 80;
+            else if (expenseRatio <= 0.9) financialHealth = 60;
+            else if (expenseRatio <= 1) financialHealth = 40;
+            else financialHealth = 20;
+        }
+
+        // Calculate budget used percentage
+        const budgetCategories = userData.budgetCategories || {};
+        const monthlyBudget = budgetCategories.monthlyBudget?.budget || 61000;
+        const monthlySpent = budgetCategories.monthlyBudget?.spent || 0;
+        const budgetUsed = monthlyBudget > 0 ? Math.round((monthlySpent / monthlyBudget) * 100) : 0;
 
         const summary = {
             totalBalance: {
