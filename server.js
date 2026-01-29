@@ -36,6 +36,9 @@ app.use("/api/user-data", require("./routes/userDataRoutes"))
 // Account routes
 app.use("/api/accounts", require("./routes/accountRoutes"))
 
+// Transaction routes
+app.use("/api/transactions", require("./routes/transactionRoutes"))
+
 
 
 

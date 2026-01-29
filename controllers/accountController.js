@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Account = require('../models/account');
 
 // Get all accounts for user
@@ -15,10 +16,10 @@ const getAccounts = async (req, res) => {
 const getAccountSummary = async (req, res) => {
     try {
         const accounts = await Account.find({ userId: req.userId });
-        
+
         let totalBalance = 0;
         let creditUsed = 0;
-        
+
         accounts.forEach(account => {
             if (account.type === 'credit') {
                 creditUsed += Math.abs(account.balance);
@@ -26,9 +27,9 @@ const getAccountSummary = async (req, res) => {
                 totalBalance += account.balance;
             }
         });
-        
+
         const netWorth = totalBalance - creditUsed;
-        
+
         res.json({
             Total: {
                 label: 'Total Balance',
@@ -55,22 +56,33 @@ const getAccountSummary = async (req, res) => {
 // Create new account
 const createAccount = async (req, res) => {
     try {
-        const { name, type, balance, institution, accountNumber } = req.body;
-        
-        const account = new Account({
+        console.log('Create account request:', {
             userId: req.userId,
+            body: req.body
+        });
+
+        const { name, type, balance, institution, accountNumber } = req.body;
+
+        if (!name) {
+            return res.status(400).json({ message: 'Account name is required' });
+        }
+
+        const account = new Account({
+            userId: new mongoose.Types.ObjectId(req.userId),
             name,
             type: type || 'savings',
             balance: balance || 0,
             institution: institution || '',
             accountNumber: accountNumber || '',
         });
-        
+
         await account.save();
+        console.log('Account created successfully:', account);
         res.status(201).json({ message: 'Account created successfully', data: account });
     } catch (error) {
-        console.error('Create account error:', error);
-        res.status(500).json({ message: 'Server error' });
+        console.error('Create account error:', error.message);
+        console.error('Full error:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
 
@@ -79,17 +91,17 @@ const updateAccount = async (req, res) => {
     try {
         const { id } = req.params;
         const updateData = req.body;
-        
+
         const account = await Account.findOneAndUpdate(
             { _id: id, userId: req.userId },
             { $set: updateData },
             { new: true }
         );
-        
+
         if (!account) {
             return res.status(404).json({ message: 'Account not found' });
         }
-        
+
         res.json({ message: 'Account updated successfully', data: account });
     } catch (error) {
         console.error('Update account error:', error);
@@ -101,13 +113,13 @@ const updateAccount = async (req, res) => {
 const deleteAccount = async (req, res) => {
     try {
         const { id } = req.params;
-        
+
         const account = await Account.findOneAndDelete({ _id: id, userId: req.userId });
-        
+
         if (!account) {
             return res.status(404).json({ message: 'Account not found' });
         }
-        
+
         res.json({ message: 'Account deleted successfully' });
     } catch (error) {
         console.error('Delete account error:', error);

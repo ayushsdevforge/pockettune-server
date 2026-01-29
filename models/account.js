@@ -37,9 +37,8 @@ const accountSchema = new mongoose.Schema({
     },
 });
 
-accountSchema.pre('save', function (next) {
+accountSchema.pre('save', function () {
     this.updatedAt = Date.now();
-    next();
 });
 
 module.exports = mongoose.model('Account', accountSchema);
