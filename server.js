@@ -39,6 +39,21 @@ app.use("/api/accounts", require("./routes/accountRoutes"))
 // Transaction routes
 app.use("/api/transactions", require("./routes/transactionRoutes"))
 
+// Bills routes
+app.use("/api/bills", require("./routes/billRoutes"))
+
+// Goals routes
+app.use("/api/goals", require("./routes/goalRoutes"))
+
+// Lending routes
+app.use("/api/lending", require("./routes/lendingRoutes"))
+
+// Clients routes
+app.use("/api/clients", require("./routes/clientRoutes"))
+
+// Analytics routes
+app.use("/api/analytics", require("./routes/analyticsRoutes"))
+
 
 
 
