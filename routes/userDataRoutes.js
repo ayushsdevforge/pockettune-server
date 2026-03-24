@@ -7,6 +7,7 @@ const {
     updateUserData,
     getFinancialSummary,
     getBudgetData,
+    clearAllData,
 } = require('../controllers/userDataController');
 
 // All routes require authentication
@@ -26,5 +27,8 @@ router.get('/summary', getFinancialSummary);
 
 // Get budget data (for recent budget section)
 router.get('/budget', getBudgetData);
+
+// Clear all user data
+router.delete('/clear-all', clearAllData);
 
 module.exports = router;

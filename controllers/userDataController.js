@@ -1,5 +1,10 @@
 const UserData = require('../models/userData');
 const Account = require('../models/account');
+const Transaction = require('../models/transaction');
+const Goal = require('../models/goal');
+const Bill = require('../models/bill');
+const Lending = require('../models/lending');
+const Client = require('../models/client');
 
 // Initialize user data with default values
 const initializeUserData = async (req, res) => {
@@ -248,10 +253,47 @@ const getBudgetData = async (req, res) => {
     }
 };
 
+// Clear all financial data
+const clearAllData = async (req, res) => {
+    try {
+        const userId = req.userId;
+
+        // Delete all user financial data
+        await Promise.all([
+            Account.deleteMany({ userId }),
+            Transaction.deleteMany({ userId }),
+            Goal.deleteMany({ userId }),
+            Bill.deleteMany({ userId }),
+            Lending.deleteMany({ userId }),
+            Client.deleteMany({ userId }),
+        ]);
+
+        // Reset user data to default
+        await UserData.findOneAndUpdate(
+            { userId },
+            {
+                $set: {
+                    monthlyIncome: 0,
+                    monthlyExpenses: 0,
+                    budgetCategories: {},
+                    customCategories: [],
+                }
+            },
+            { new: true, upsert: true }
+        );
+
+        res.json({ message: 'All financial data cleared successfully' });
+    } catch (error) {
+        console.error('Clear all data error:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
 module.exports = {
     initializeUserData,
     getUserData,
     updateUserData,
     getFinancialSummary,
     getBudgetData,
+    clearAllData,
 };
