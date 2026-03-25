@@ -12,7 +12,7 @@ const clientSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ['Individual', 'Business'],
+        enum: ['Individual', 'Business', 'Freelancer', 'Vendor'],
         default: 'Individual',
     },
     contactPerson: {

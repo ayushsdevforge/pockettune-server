@@ -44,11 +44,11 @@ const createClient = async (req, res) => {
     try {
         const { name, type, contactPerson, email, phone, address, description } = req.body;
 
-        if (!name) return res.status(400).json({ message: 'Client name is required' });
+        if (!name || !String(name).trim()) return res.status(400).json({ message: 'Client name is required' });
 
         const client = new Client({
             userId: req.userId,
-            name,
+            name: String(name).trim(),
             type: type || 'Individual',
             contactPerson: contactPerson || '',
             email: email || '',
@@ -62,6 +62,9 @@ const createClient = async (req, res) => {
         res.status(201).json({ message: 'Client created successfully', data: client });
     } catch (error) {
         console.error('Create client error:', error);
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: error.message });
+        }
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
