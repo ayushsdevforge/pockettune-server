@@ -142,37 +142,57 @@ const createExpense = async (req, res) => {
             await account.save();
         }
         
-        // Update user data monthly expenses and budget category
-        const userData = await UserData.findOne({ userId: req.userId });
-        if (userData) {
-            userData.monthlyExpenses = (userData.monthlyExpenses || 0) + amount;
-            
-            // Update budget category spent
-            const categoryMap = {
-                'Food & Dining': 'foodDining',
-                'Transportation': 'transportation',
-                'Shopping': 'shopping',
-                'Entertainment': 'entertainment',
-                'Bills & Utilities': 'billsUtilities',
-                'Healthcare': 'healthcare',
-                'Education': 'education',
-                'Personal Care': 'personalCare',
-            };
-            
-            const budgetKey = categoryMap[category];
-            if (budgetKey && userData.budgetCategories && userData.budgetCategories[budgetKey]) {
-                userData.budgetCategories[budgetKey].spent = 
-                    (userData.budgetCategories[budgetKey].spent || 0) + amount;
+        // Update user data monthly expenses and budget category using atomic $inc
+        // Map display names to budget category keys
+        const categoryMap = {
+            'Food & Dining': 'foodDining',
+            'Transportation': 'transportation',
+            'Shopping': 'shopping',
+            'Entertainment': 'entertainment',
+            'Bills & Utilities': 'billsUtilities',
+            'Healthcare': 'healthcare',
+            'Education': 'education',
+            'Personal Care': 'personalCare',
+        };
+        
+        // Resolve the budget key for this category
+        let budgetKey = categoryMap[category];
+        if (!budgetKey) {
+            // Try direct key match for custom categories
+            const userData = await UserData.findOne({ userId: req.userId }).lean();
+            if (userData && userData.budgetCategories) {
+                if (userData.budgetCategories[category] !== undefined) {
+                    budgetKey = category;
+                } else {
+                    // Try converting display name to camelCase key
+                    const camelKey = category
+                        .replace(/[&]/g, '')
+                        .trim()
+                        .split(/\s+/)
+                        .map((word, i) => i === 0 ? word.toLowerCase() : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                        .join('');
+                    if (userData.budgetCategories[camelKey] !== undefined) {
+                        budgetKey = camelKey;
+                    }
+                }
             }
-            
-            // Update monthly budget spent
-            if (userData.budgetCategories && userData.budgetCategories.monthlyBudget) {
-                userData.budgetCategories.monthlyBudget.spent = 
-                    (userData.budgetCategories.monthlyBudget.spent || 0) + amount;
-            }
-            
-            await userData.save();
         }
+
+        // Build atomic $inc update
+        const incUpdate = {
+            monthlyExpenses: amount,
+            'budgetCategories.monthlyBudget.spent': amount,
+        };
+        
+        // Add category-specific spent update if we found a matching budget key
+        if (budgetKey) {
+            incUpdate[`budgetCategories.${budgetKey}.spent`] = amount;
+        }
+        
+        await UserData.findOneAndUpdate(
+            { userId: req.userId },
+            { $inc: incUpdate }
+        );
         
         res.status(201).json({ 
             message: 'Expense added successfully', 

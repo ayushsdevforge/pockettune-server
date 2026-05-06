@@ -54,6 +54,9 @@ app.use("/api/clients", require("./routes/clientRoutes"))
 // Analytics routes
 app.use("/api/analytics", require("./routes/analyticsRoutes"))
 
+// AI routes (Gemini-powered categorization, insights, bill reminders)
+app.use("/api/ai", require("./routes/aiRoutes"))
+
 
 
 
