@@ -1,19 +1,17 @@
 const Transaction = require('../models/transaction');
 const Bill = require('../models/bill');
 
-<<<<<<< HEAD
 // Models tried in order — fallback on 429/quota error
 const Models = [
     "gemini-3-pro-preview",
     "gemini-2.5-pro",
     "gemini-2.5-flash"
-=======
+    
 // Models tried in order — fallback on 429/quota errors
 const MODELS = [
     'gemini-2.5-flash',
     'gemini-2.0-flash',
     'gemini-2.0-flash-lite',
->>>>>>> 3f79da5b7b9c97da1c73f17132cfc66b3161fa65
 ];
 
 // Call Gemini v1 REST directly; tries each model with one retry on 429
@@ -26,10 +24,7 @@ const generate = async (prompt) => {
 
         for (let attempt = 1; attempt <= 2; attempt++) {
             if (attempt === 2) {
-<<<<<<< HEAD
-=======
                 // Brief pause before retry
->>>>>>> 3f79da5b7b9c97da1c73f17132cfc66b3161fa65
                 await new Promise((r) => setTimeout(r, 3000));
             }
 
@@ -48,7 +43,6 @@ const generate = async (prompt) => {
             }
 
             const errCode = data.error?.code;
-<<<<<<< HEAD
             const errMsg = data.error?.message || `HTTP ${response.status}`;
 
             if (errCode === 429) {
@@ -56,7 +50,6 @@ const generate = async (prompt) => {
                 break;
             }
 
-=======
             const errMsg  = data.error?.message || `HTTP ${response.status}`;
 
             // 429 = rate limited — retry this attempt, then try next model
@@ -66,16 +59,11 @@ const generate = async (prompt) => {
             }
 
             // 404 = model not found for this key — skip immediately
->>>>>>> 3f79da5b7b9c97da1c73f17132cfc66b3161fa65
             if (errCode === 404) {
                 lastError = `Model ${model} not available: ${errMsg}`;
                 break;
-            }
-
-<<<<<<< HEAD
-=======
+            
             // Other error — throw immediately
->>>>>>> 3f79da5b7b9c97da1c73f17132cfc66b3161fa65
             throw new Error(errMsg);
         }
     }
@@ -83,10 +71,8 @@ const generate = async (prompt) => {
     throw new Error(lastError || 'All Gemini models are currently rate-limited. Please try again in a minute.');
 };
 
-<<<<<<< HEAD
-=======
+
 // Strip markdown fences and parse JSON
->>>>>>> 3f79da5b7b9c97da1c73f17132cfc66b3161fa65
 const parseJSON = (text) => {
     const clean = text
         .replace(/^```json\s*/i, '')
@@ -108,17 +94,16 @@ const categorizeTransaction = async (req, res) => {
         const validCategories =
             type === 'expense'
                 ? ['Food & Dining', 'Transportation', 'Shopping', 'Entertainment',
-<<<<<<< HEAD
+
                     'Bills & Utilities', 'Healthcare', 'Education', 'Personal Care',
                     'Travel', 'Groceries', 'Others']
                 : ['Salary', 'Freelance', 'Business', 'Investment',
                     'Rental Income', 'Gift', 'Refund', 'Others'];
-=======
+
                    'Bills & Utilities', 'Healthcare', 'Education', 'Personal Care',
                    'Travel', 'Groceries', 'Others']
                 : ['Salary', 'Freelance', 'Business', 'Investment',
                    'Rental Income', 'Gift', 'Refund', 'Others'];
->>>>>>> 3f79da5b7b9c97da1c73f17132cfc66b3161fa65
 
         const prompt = `You are a financial transaction categorizer. 
 Analyze this transaction and assign the BEST category from the list below.
@@ -277,15 +262,15 @@ const getBillReminders = async (req, res) => {
             });
         }
 
-<<<<<<< HEAD
+
         const overdueBills = bills.filter((b) => new Date(b.dueDate) < now);
         const upcomingBills = bills.filter((b) => new Date(b.dueDate) >= now && new Date(b.dueDate) <= sevenDaysLater);
         const futureBills = bills.filter((b) => new Date(b.dueDate) > sevenDaysLater);
-=======
+
         const overdueBills  = bills.filter((b) => new Date(b.dueDate) < now);
         const upcomingBills = bills.filter((b) => new Date(b.dueDate) >= now && new Date(b.dueDate) <= sevenDaysLater);
         const futureBills   = bills.filter((b) => new Date(b.dueDate) > sevenDaysLater);
->>>>>>> 3f79da5b7b9c97da1c73f17132cfc66b3161fa65
+
 
         const overdueData = overdueBills.map((b) => ({
             name: b.name, amount: b.amount,
@@ -298,11 +283,10 @@ const getBillReminders = async (req, res) => {
             daysLeft: Math.ceil((new Date(b.dueDate) - now) / 86400000),
             category: b.category,
         }));
-<<<<<<< HEAD
+
         const totalOverdueAmount = overdueBills.reduce((s, b) => s + b.amount, 0);
-=======
+
         const totalOverdueAmount  = overdueBills.reduce((s, b) => s + b.amount, 0);
->>>>>>> 3f79da5b7b9c97da1c73f17132cfc66b3161fa65
         const totalUpcomingAmount = upcomingBills.reduce((s, b) => s + b.amount, 0);
 
         const prompt = `You are a friendly financial assistant sending bill payment reminders.
