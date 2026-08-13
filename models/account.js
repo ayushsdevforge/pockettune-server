@@ -27,10 +27,13 @@ const accountSchema = new mongoose.Schema({
         type: String,
         default: '',
     },
+<<<<<<< HEAD
     accountHolder: {
         type: String,
         default: '',
     },
+=======
+>>>>>>> 3f79da5b7b9c97da1c73f17132cfc66b3161fa65
     createdAt: {
         type: Date,
         default: Date.now,

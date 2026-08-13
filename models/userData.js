@@ -97,8 +97,14 @@ const userDataSchema = new mongoose.Schema({
 });
 
 // Update the updatedAt field before saving
+<<<<<<< HEAD
 userDataSchema.pre('save', async function () {
     this.updatedAt = Date.now();
+=======
+userDataSchema.pre('save', function (next) {
+    this.updatedAt = Date.now();
+    next();
+>>>>>>> 3f79da5b7b9c97da1c73f17132cfc66b3161fa65
 });
 
 module.exports = mongoose.model('UserData', userDataSchema);

@@ -290,6 +290,7 @@ const deleteTransaction = async (req, res) => {
         }
         
         // Reverse user data changes
+<<<<<<< HEAD
         if (transaction.type === 'income') {
             await UserData.findOneAndUpdate(
                 { userId: req.userId },
@@ -340,6 +341,16 @@ const deleteTransaction = async (req, res) => {
                 { userId: req.userId },
                 { $inc: decUpdate }
             );
+=======
+        const userData = await UserData.findOne({ userId: req.userId });
+        if (userData) {
+            if (transaction.type === 'income') {
+                userData.monthlyIncome = Math.max(0, (userData.monthlyIncome || 0) - transaction.amount);
+            } else if (transaction.type === 'expense') {
+                userData.monthlyExpenses = Math.max(0, (userData.monthlyExpenses || 0) - transaction.amount);
+            }
+            await userData.save();
+>>>>>>> 3f79da5b7b9c97da1c73f17132cfc66b3161fa65
         }
         
         await Transaction.findByIdAndDelete(id);

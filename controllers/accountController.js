@@ -74,7 +74,10 @@ const createAccount = async (req, res) => {
             balance: balance || 0,
             institution: institution || '',
             accountNumber: accountNumber || '',
+<<<<<<< HEAD
             accountHolder: req.user.name, // Assuming the account holder is the user creating the account      
+=======
+>>>>>>> 3f79da5b7b9c97da1c73f17132cfc66b3161fa65
         });
 
         await account.save();
@@ -87,6 +90,7 @@ const createAccount = async (req, res) => {
     }
 };
 
+<<<<<<< HEAD
 
 // Update account
 
@@ -109,6 +113,9 @@ const deleteAccount = async (req, res) => {
     }
 };
 
+=======
+// Update account
+>>>>>>> 3f79da5b7b9c97da1c73f17132cfc66b3161fa65
 const updateAccount = async (req, res) => {
     try {
         const { id } = req.params;
@@ -131,7 +138,27 @@ const updateAccount = async (req, res) => {
     }
 };
 
+<<<<<<< HEAD
 
+=======
+// Delete account
+const deleteAccount = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const account = await Account.findOneAndDelete({ _id: id, userId: req.userId });
+
+        if (!account) {
+            return res.status(404).json({ message: 'Account not found' });
+        }
+
+        res.json({ message: 'Account deleted successfully' });
+    } catch (error) {
+        console.error('Delete account error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+>>>>>>> 3f79da5b7b9c97da1c73f17132cfc66b3161fa65
 
 module.exports = {
     getAccounts,
@@ -139,5 +166,8 @@ module.exports = {
     createAccount,
     updateAccount,
     deleteAccount,
+<<<<<<< HEAD
     
+=======
+>>>>>>> 3f79da5b7b9c97da1c73f17132cfc66b3161fa65
 };
